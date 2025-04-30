@@ -1,0 +1,42 @@
+# .NET Core
+[Dd]ebug/
+[Dd]ebugPublic/
+[Dd]ist/
+build/
+bld/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Dd]ist/
+.vs/
+.vscode/
+.idea/
+# User-specific files
+.vscode/
+.idea/
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+# Windows Installer files
+*.cab
