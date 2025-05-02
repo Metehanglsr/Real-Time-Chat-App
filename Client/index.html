@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealTime Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div>
+    <div id="deletedLogin">
+        <div class="card" style="width: 100%; max-width: 400px;">
+            <div class="card-body">
+                <h5 class="card-title text-center mb-4">RealTime Chat</h5>
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Enter your name</label>
+                        <input type="text" class="form-control" id="username" placeholder="Your name" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex" style="height: 100vh;">
+        <div class="w-25 bg-dark text-white p-3" style="max-width: 250px; min-width: 200px;">
+            <h5 class="mb-4">Contacts</h5>
+            <ul class="list-unstyled" id="users">
+                
+            </ul>
+        </div>
+
+        <!-- Main Container: Chat Area -->
+        <div class="col-9 d-flex flex-column w-75">
+            <!-- Chat Header -->
+            <div class="d-flex justify-content-between align-items-center bg-primary text-white p-3">
+                <div class="d-flex align-items-center">
+                    <h5 class="mb-0">John Doe</h5>
+                </div>
+                <div class="d-flex">
+                    <button class="btn btn-light btn-sm me-2">
+                        <i class="fas fa-video"></i>
+                    </button>
+                    <button class="btn btn-light btn-sm">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="flex-grow-1 overflow-auto p-3" style="max-height: 80vh;">
+                <div class="d-flex justify-content-start mb-3">
+                    <div class="bg-white p-2 rounded-3 shadow-sm" style="max-width: 70%;">
+                        <p class="mb-0">Hey, how are you?</p>
+                        <small class="text-muted">10:30 AM</small>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mb-3">
+                    <div class="bg-primary text-white p-2 rounded-3 shadow-sm" style="max-width: 70%;">
+                        <p class="mb-0">I'm good, thanks! How about you?</p>
+                        <small class="text-muted">10:31 AM</small>
+                    </div>
+                </div>
+                <!-- More messages can be added here -->
+            </div>
+
+            <!-- Message Input -->
+            <div class="input-group p-3 bg-white border-top">
+                <input type="text" class="form-control" placeholder="Type a message..." aria-label="Type a message">
+                <button class="btn btn-primary" type="button">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+   
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="jquery.min.js"></script>
+    <script src="signalr.min.js"></script>
+<script>
+$(document).ready(function() {
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("https://localhost:7042/chat-hub")
+        .build();
+
+    connection.start().then(function() {
+        console.log("SignalR connection established");
+    }).catch(function(err) {
+        console.error("SignalR connection error: " + err);
+    });
+
+    connection.on("ReceiveUsers", function(users) {
+        console.log(users);
+        $('#users').empty();
+        users.forEach(function(user) {
+            $('#users').append(`<li class="list-group-item">${user.name}</li>`);
+        });
+    }); 
+    $("#loginForm").submit(function(event) {
+                event.preventDefault();
+    
+                const username = $("#username").val();
+                if (username) {
+                    connection.invoke("GetName", username).catch(function(err) {
+                        console.error("Error calling GetName: " + err);
+                    });
+    
+                    console.log("Kullanıcı adı: " + username);
+                }
+                $("#deletedLogin").hide();
+            });
+});
+</script>
+
+</body>
+</html>

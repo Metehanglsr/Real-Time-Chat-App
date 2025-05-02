@@ -1,42 +1,59 @@
 # .NET Core
-[Dd]ebug/
-[Dd]ebugPublic/
-[Dd]ist/
-build/
-bld/
-[Dd]ebug/
-[Dd]ebugPublic/
-[Dd]ist/
+bin/
+obj/
+[Bb]uild/
+[Dd]ebug*/
+[Rr]elease*/
 .vs/
-.vscode/
+*.user
+*.suo
+
+# Rider / VS Code / JetBrains / Visual Studio
 .idea/
-# User-specific files
 .vscode/
-.idea/
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-# Windows Installer files
-*.cab
-*.msi
-*.msm
-*.msp
-# Windows Installer files
-*.cab
+*.code-workspace
+
+# ASP.NET Identity / Configuration / Secrets
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.json
+
+# NLog / Serilog / Logs
+logs/
+*.log
+
+# npm / frontend / JS stuff
+node_modules/
+dist/
+build/
+wwwroot/lib/
+wwwroot/js/
+wwwroot/css/
+Client/signalr.min.js
+Client/jquery.min.js
+# jQuery / SignalR static libs
+wwwroot/signalr/
+wwwroot/jquery/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Package managers
+*.nupkg
+*.snupkg
+packages/
+
+# Test / coverage results
+TestResults/
+coverage/
+
+# Redis / RabbitMQ temp dumps (if generated)
+dump.rdb
+*.pid
+*.sock
+
+# Other
+*.swp
+*.bak
+*.tmp
