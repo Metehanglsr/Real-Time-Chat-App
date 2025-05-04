@@ -9,10 +9,7 @@ namespace RealTimeChatApp.Application.Abstractions.Hubs
 {
     public interface IChatHubService
     {
-        Task SendPrivateMessage(string receiverConntectionId, string message);
-        //Task SendGroupMessage(ChatMessageDto message);
-        Task JoinGroup(string userId, string groupName);
-        Task LeaveGroup(string userId, string groupName);
+        Task SendPrivateMessage(string receiverConnectionId, string message);
         Task NotifyTyping(string receiverUserId);
     }
 

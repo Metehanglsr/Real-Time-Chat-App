@@ -1,121 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RealTime Chat</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-light">
-<div>
-    <div id="deletedLogin">
-        <div class="card" style="width: 100%; max-width: 400px;">
-            <div class="card-body">
-                <h5 class="card-title text-center mb-4">RealTime Chat</h5>
-                <form id="loginForm">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Enter your name</label>
-                        <input type="text" class="form-control" id="username" placeholder="Your name" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-sign-in-alt"></i> Login
+    <div>
+        <div id="deletedLogin" class="container my-5 d-flex align-items-center justify-content-center">
+            <div class="card" style="width: 100%; max-width: 400px;">
+                <div class="card-body">
+                    <h5 class="card-title text-center mb-4">RealTime Chat</h5>
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Enter your name</label>
+                            <input type="text" class="form-control" id="username" placeholder="Your name" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex" id="chatMain" style="height: 100vh; visibility: hidden;">
+            <div class="w-25 bg-dark text-white p-3" style="max-width: 250px; min-width: 200px;">
+                <h5 class="mb-4">Contacts</h5>
+                <ul class="list-unstyled" id="users"></ul>
+            </div>
+
+            <div class="col-9 d-flex flex-column w-75">
+                <div class="d-flex justify-content-between align-items-center bg-primary text-white p-3">
+                    <h5 class="mb-0" id="chatWith">Select a contact</h5>
+                </div>
+
+                <div id="messageContainer" class="flex-grow-1 overflow-auto p-3" style="max-height: 80vh;"></div>
+
+                <div class="input-group p-3 bg-white border-top">
+                    <input type="text" class="form-control" placeholder="Type a message..." aria-label="Type a message"
+                        id="messageInput">
+                    <button class="btn btn-primary" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i>
                     </button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
-    <div class="d-flex" style="height: 100vh;">
-        <div class="w-25 bg-dark text-white p-3" style="max-width: 250px; min-width: 200px;">
-            <h5 class="mb-4">Contacts</h5>
-            <ul class="list-unstyled" id="users">
-                
-            </ul>
-        </div>
 
-        <!-- Main Container: Chat Area -->
-        <div class="col-9 d-flex flex-column w-75">
-            <!-- Chat Header -->
-            <div class="d-flex justify-content-between align-items-center bg-primary text-white p-3">
-                <div class="d-flex align-items-center">
-                    <h5 class="mb-0">John Doe</h5>
-                </div>
-                <div class="d-flex">
-                    <button class="btn btn-light btn-sm me-2">
-                        <i class="fas fa-video"></i>
-                    </button>
-                    <button class="btn btn-light btn-sm">
-                        <i class="fas fa-info-circle"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Chat Messages -->
-            <div class="flex-grow-1 overflow-auto p-3" style="max-height: 80vh;">
-                <div class="d-flex justify-content-start mb-3">
-                    <div class="bg-white p-2 rounded-3 shadow-sm" style="max-width: 70%;">
-                        <p class="mb-0">Hey, how are you?</p>
-                        <small class="text-muted">10:30 AM</small>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-end mb-3">
-                    <div class="bg-primary text-white p-2 rounded-3 shadow-sm" style="max-width: 70%;">
-                        <p class="mb-0">I'm good, thanks! How about you?</p>
-                        <small class="text-muted">10:31 AM</small>
-                    </div>
-                </div>
-                <!-- More messages can be added here -->
-            </div>
-
-            <!-- Message Input -->
-            <div class="input-group p-3 bg-white border-top">
-                <input type="text" class="form-control" placeholder="Type a message..." aria-label="Type a message">
-                <button class="btn btn-primary" type="button">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-   
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
     <script src="jquery.min.js"></script>
     <script src="signalr.min.js"></script>
-<script>
-$(document).ready(function() {
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl("https://localhost:7042/chat-hub")
-        .build();
 
-    connection.start().then(function() {
-        console.log("SignalR connection established");
-    }).catch(function(err) {
-        console.error("SignalR connection error: " + err);
-    });
+    <script>
 
-    connection.on("ReceiveUsers", function(users) {
-        console.log(users);
-        $('#users').empty();
-        users.forEach(function(user) {
-            $('#users').append(`<li class="list-group-item">${user.name}</li>`);
-        });
-    }); 
-    $("#loginForm").submit(function(event) {
-                event.preventDefault();
-    
-                const username = $("#username").val();
-                if (username) {
-                    connection.invoke("GetName", username).catch(function(err) {
-                        console.error("Error calling GetName: " + err);
-                    });
-    
-                    console.log("Kullanıcı adı: " + username);
-                }
-                $("#deletedLogin").hide();
+        $(document).ready(function () {
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("https://localhost:7042/chat-hub")
+                .build();
+
+            let userId = "";
+            let username = "";
+            let receiverId = "";
+            let receiverName = "";
+
+            connection.start().then(function () {
+                console.log("SignalR connected");
+            }).catch(function (err) {
+                console.error("Connection error:", err);
             });
-});
-</script>
 
+            connection.on("ReceiveUsers", function (users) {
+                $('#users').empty();
+                users.forEach(function (user) {
+                    if (user.connectionId !== userId) {
+                        $('#users').append(`
+              <li class="user-item list-group-item d-flex align-items-center gap-2 py-2 px-3 mb-2 bg-white text-dark rounded shadow-sm"
+                  data-id="${user.connectionId}" data-name="${user.name}" style="cursor:pointer;">
+                <img src="https://ui-avatars.com/api/?name=${user.name}&background=random&size=32" class="rounded-circle" width="32" height="32" alt="${user.name}">
+                <span class="fw-semibold">${user.name}</span>
+              </li>
+            `);
+                    }
+                });
+
+                $(".user-item").on("click", function () {
+                    receiverId = $(this).data("id");
+                    receiverName = $(this).data("name");
+                    $("#chatWith").text(`Chatting with ${receiverName}`);
+                    $(".user-item").removeClass("active");
+                    $(this).addClass("active");
+                });
+            });
+
+            $("#loginForm").submit(function (e) {
+                e.preventDefault();
+
+                username = $("#username").val();
+
+                if (username) {
+                    connection.invoke("GetName", username).then(function (connectionId) {
+                        userId = connectionId;
+                        console.log("User ID:", userId);
+
+                        document.getElementById("chatMain").style.visibility = "visible";
+                        document.getElementById("deletedLogin").remove();
+
+                        connection.invoke("GetUsers").then(function () {
+                            console.log("Users list retrieved");
+                        }).catch(function (err) {
+                            console.error("GetUsers error:", err);
+                        });
+
+                    }).catch(function (err) {
+                        console.error("GetName error:", err);
+                    });
+                }
+            });
+            $("#sendBtn").on("click", function () {
+                const message = $("#messageInput").val().trim();
+                if (!receiverId) return alert("Select a contact to chat.");
+                if (message === "") return;
+
+                connection.invoke("SendPrivateMessage", receiverId, message)
+                    .then(() => {
+                        addMessage(message, true);
+                        $("#messageInput").val("");
+                    })
+                    .catch(err => console.error("Send error:", err));
+            });
+
+            connection.on("ReceiveMessage", function (message) {
+                addMessage(message, false);
+            });
+
+            function addMessage(message, isMine) {
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const align = isMine ? 'justify-content-end' : 'justify-content-start';
+                const style = isMine ? 'bg-primary text-white' : 'bg-white';
+
+                $("#messageContainer").append(`
+        <div class="d-flex ${align} mb-3">
+        <div class="${style} p-2 rounded-3 shadow-sm" style="max-width: 70%;">
+            <p class="mb-0">${message}</p>
+            <small class="text-muted">${time}</small>
+        </div>
+        </div>
+    `);
+
+                $("#messageContainer").scrollTop($("#messageContainer")[0].scrollHeight);
+            }
+
+            $("#messageInput").on("input", function () {
+                const message = $(this).val().trim();
+                if (receiverId && message.length > 0) {
+                    connection.invoke("NotifyTyping", receiverId);
+                }
+            });
+
+            connection.on("ReceiveTypingNotification", function () {
+                if ($("#typingIndicator").length === 0) {
+                    $(".input-group").before(`
+        <div id="typingIndicator" class="text-muted ps-3 text-end" style="font-style: italic; color: gray;">
+            ${receiverName} is typing...
+        </div>
+        `);
+                    setTimeout(() => {
+                        $("#typingIndicator").fadeOut(300, function () { $(this).remove(); });
+                    }, 2000);
+                }
+            });
+        });
+    </script>
 </body>
+
 </html>

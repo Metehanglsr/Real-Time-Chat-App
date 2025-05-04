@@ -19,26 +19,14 @@ namespace RealTimeChatApp.SignalR.HubServices
             _hubContext = hubContext;
         }
 
-        public Task JoinGroup(string userId, string groupName)
+        public Task NotifyTyping(string receiverConnectionId)
         {
-            throw new NotImplementedException();
+            return _hubContext.Clients.Client(receiverConnectionId)
+                .SendAsync("ReceiveTypingNotification");
         }
-
-        public Task LeaveGroup(string userId, string groupName)
+        public async Task SendPrivateMessage(string receiverConnectionId, string message)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task NotifyTyping(string receiverUserId)
-        {
-            return _hubContext.Clients.User(receiverUserId).SendAsync("ReceiveTypingNotification");
-        }
-
-
-
-        public async Task SendPrivateMessage(string receiverConntectionId, string message)
-        {
-            var receiverClient = ClientSource.Clients.FirstOrDefault(c => c.ConnectionId == receiverConntectionId);
+            var receiverClient = ClientSource.Clients.FirstOrDefault(c => c.ConnectionId == receiverConnectionId);
 
             if (receiverClient != null)
             {
