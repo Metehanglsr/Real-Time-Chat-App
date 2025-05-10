@@ -18,6 +18,8 @@ namespace RealTimeChatApp.Application.Abstractions.Redis
             Task<List<UserDto>> GetOnlineUsersAsync();
             Task<UserDto?> GetUserByConnectionIdAsync(string connectionId);
             Task<bool> IsUserOnlineAsync(string connectionId);
+            Task<string> CacheMessageAsync(string senderId, string receiverId, string message, DateTime time);
+            Task<List<string>> GetCachedMessagesAsync(string senderId, string receiverId);
 
         }
     }

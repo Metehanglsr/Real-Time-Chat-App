@@ -49,9 +49,27 @@ function setupLogin() {
 
 //#region Register SignalR Event Handlers
 function registerSignalREvents() {
+    connection.on("ReceiveChatHistory", function (messages) {
+        $("#messageContainer").empty();
+
+        messages.forEach(raw => {
+            const data = JSON.parse(raw);
+            const isMine = data.SenderId === userId;
+            console.log("sender: " + data.SenderId + " user: " + userId);
+            addMessage(data.Message, isMine);
+        });
+    });
+
     connection.on("ReceiveUsers", updateUsersList);
-    connection.on("ReceiveMessage", message => addMessage(message, false));
+
+    connection.on("ReceiveMessage", messageObject => {
+        console.log("Received:", messageObject);
+        $("#chatWith").text(`Chatting with ${messageObject.senderName}`);
+        addMessage(messageObject.message, false);
+    });
+
     connection.on("ReceiveTypingNotification", showTypingIndicator);
+
     connection.on("UserOffline", function (disconnectedUserId) {
         $(`[data-id="${disconnectedUserId}"]`).remove();
 
@@ -84,9 +102,14 @@ function updateUsersList(users) {
     $(".user-item").on("click", function () {
         receiverId = $(this).data("id");
         receiverName = $(this).data("name");
+
         $("#chatWith").text(`Chatting with ${receiverName}`);
         $(".user-item").removeClass("active");
         $(this).addClass("active");
+
+        $("#messageContainer").empty();
+        connection.invoke("GetChatHistory", receiverId)
+            .catch(err => console.error("History fetch error:", err));
     });
 }
 //#endregion

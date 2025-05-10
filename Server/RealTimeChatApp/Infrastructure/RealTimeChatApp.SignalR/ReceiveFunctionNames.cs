@@ -13,5 +13,6 @@ namespace RealTimeChatApp.SignalR
         public const string UserOnline = "UserOnline";
         public const string ReceiveUsers = "ReceiveUsers";
         public const string ReceiveTypingNotification = "ReceiveTypingNotification"; 
+        public const string ReceiveChatHistory = "ReceiveChatHistory";
     }
 }

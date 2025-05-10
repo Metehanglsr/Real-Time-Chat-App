@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using RealTimeChatApp.Application.Abstractions.Redis;
 using RealTimeChatApp.Application.Abstractions.Redis.RealTimeChatApp.Application.Abstractions.Redis;
@@ -75,6 +76,42 @@ namespace RealTimeChatApp.Redis.Concrete
         {
             return await _db.KeyExistsAsync($"user:{connectionId}");
         }
+
+        public async Task<string> CacheMessageAsync(string senderId,string receiverId,string message,DateTime time)
+        {
+            string key = GenerateKey(senderId, receiverId);
+            MessageDto messageObj = new()
+            {
+                 SenderId= senderId,
+                ReceiverId = receiverId,
+                Message = message,
+                Time = time
+            };
+            string json = JsonSerializer.Serialize(messageObj);
+            await _db.ListRightPushAsync(key, json);
+            long length = await _db.ListLengthAsync(key);
+            if (length > 50)
+            {
+                await _db.ListLeftPopAsync(key);
+            }
+            return string.Empty;
+        }
+        public async Task<List<string>> GetCachedMessagesAsync(string senderId, string receiverId)
+        {
+            string key = GenerateKey(senderId, receiverId);
+
+            var cachedMessages = await _db.ListRangeAsync(key, 0, -1);
+            return cachedMessages
+                .Select(m => m.ToString())
+                .ToList();
+        }
+
+        private string GenerateKey(string senderId, string receiverId)
+        {
+            var ordered = new[] { senderId, receiverId}.OrderBy(x => x).ToArray();
+            return $"chat:{ordered[0]}:{ordered[1]}";
+        }
+
     }
 
 }

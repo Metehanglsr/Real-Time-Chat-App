@@ -27,14 +27,23 @@ namespace RealTimeChatApp.SignalR.HubServices
                 .SendAsync(ReceiveFunctionNames.ReceiveTypingNotification);
         }
 
-        public async Task SendPrivateMessage(string receiverConnectionId, string message)
+        public async Task SendPrivateMessage(string receiverConnectionId, string message, string senderId)
         {
             var receiverClient = await _redisService.GetUserByConnectionIdAsync(receiverConnectionId);
-
+            var senderClient = await _redisService.GetUserByConnectionIdAsync(senderId);
             if (receiverClient != null)
             {
-                await _hubContext.Clients.Client(receiverClient.ConnectionId).SendAsync(ReceiveFunctionNames.ReceiveMessage, message);
+                await _hubContext.Clients.Client(receiverClient.ConnectionId).SendAsync(ReceiveFunctionNames.ReceiveMessage, new
+                {
+                    SenderName = senderClient?.Name,
+                    Message = message
+                });
             }
+        }
+        public async Task GetChatHistory(string senderId,string receiverId)
+        {
+            var cachedMessages = await _redisService.GetCachedMessagesAsync(senderId,receiverId);
+            await _hubContext.Clients.Client(senderId).SendAsync(ReceiveFunctionNames.ReceiveChatHistory, cachedMessages);
         }
     }
 }
