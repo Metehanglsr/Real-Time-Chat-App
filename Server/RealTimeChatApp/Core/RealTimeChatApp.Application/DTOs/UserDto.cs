@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace RealTimeChatApp.Application.DTOs
 {
-    public class ChatClient
+    public class UserDto
     {
-        public string ConnectionId { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
+        public string ConnectionId { get; set; } = default!;
+        public string Name { get; set; } = default!;
     }
 }

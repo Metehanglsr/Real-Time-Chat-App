@@ -5,18 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 using RealTimeChatApp.Application.Abstractions.Hubs;
+using RealTimeChatApp.Application.Abstractions.Redis.RealTimeChatApp.Application.Abstractions.Redis;
 using RealTimeChatApp.Application.DTOs;
-using RealTimeChatApp.SignalR.Data;
 
 namespace RealTimeChatApp.SignalR.HubServices
 {
     public sealed class ChatHubService : IChatHubService
     {
         private readonly IHubContext<ChatHub> _hubContext;
+        private readonly IRedisService _redisService;
 
-        public ChatHubService(IHubContext<ChatHub> hubContext)
+        public ChatHubService(IHubContext<ChatHub> hubContext, IRedisService redisService)
         {
             _hubContext = hubContext;
+            _redisService = redisService;
         }
 
         public Task NotifyTyping(string receiverConnectionId)
@@ -24,9 +26,10 @@ namespace RealTimeChatApp.SignalR.HubServices
             return _hubContext.Clients.Client(receiverConnectionId)
                 .SendAsync("ReceiveTypingNotification");
         }
+
         public async Task SendPrivateMessage(string receiverConnectionId, string message)
         {
-            var receiverClient = ClientSource.Clients.FirstOrDefault(c => c.ConnectionId == receiverConnectionId);
+            var receiverClient = await _redisService.GetUserByConnectionIdAsync(receiverConnectionId);
 
             if (receiverClient != null)
             {

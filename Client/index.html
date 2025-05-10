@@ -61,68 +61,74 @@
     <script>
 
         $(document).ready(function () {
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl("https://localhost:7042/chat-hub")
-                .build();
+          const connection = new signalR.HubConnectionBuilder()
+        .withUrl("https://localhost:7042/chat-hub")
+        .build();
 
-            let userId = "";
-            let username = "";
-            let receiverId = "";
-            let receiverName = "";
+    let userId = "";
+    let username = "";
+    let receiverId = "";
+    let receiverName = "";
 
-            connection.start().then(function () {
-                console.log("SignalR connected");
+    connection.start()
+    .then(() => {
+        console.log("SignalR connected");
+
+        // Bağlantı kurulduktan sonra invoke çağrısı yapılmalı!
+        return connection.invoke("SetUsername", name);
+    })
+    .catch(err => {
+        console.error("SignalR connection error:", err);
+    });
+
+
+    connection.on("ReceiveUsers", function (users) {
+        $('#users').empty();
+        users.forEach(function (user) {
+            if (user.connectionId !== userId) {
+                $('#users').append(`
+                    <li class="user-item list-group-item d-flex align-items-center gap-2 py-2 px-3 mb-2 bg-white text-dark rounded shadow-sm"
+                        data-id="${user.connectionId}" data-name="${user.name}" style="cursor:pointer;">
+                    <img src="https://ui-avatars.com/api/?name=${user.name}&background=random&size=32" class="rounded-circle" width="32" height="32" alt="${user.name}">
+                    <span class="fw-semibold">${user.name}</span>
+                    </li>
+                `);
+            }
+        });
+
+        $(".user-item").on("click", function () {
+            receiverId = $(this).data("id");
+            receiverName = $(this).data("name");
+            $("#chatWith").text(`Chatting with ${receiverName}`);
+            $(".user-item").removeClass("active");
+            $(this).addClass("active");
+        });
+    });
+
+    $("#loginForm").submit(function (e) {
+        e.preventDefault();
+
+        username = $("#username").val();
+
+        if (username) {
+            connection.invoke("SetUsername", username).then(function (connectionId) {
+                userId = connectionId;
+                console.log("User ID:", userId);
+
+                document.getElementById("chatMain").style.visibility = "visible";
+                document.getElementById("deletedLogin").remove();
+
+                connection.invoke("GetUsers").then(function () {
+                    console.log("Users list retrieved");
+                }).catch(function (err) {
+                    console.error("GetUsers error:", err);
+                });
+
             }).catch(function (err) {
-                console.error("Connection error:", err);
+                console.error("SetUsername error:", err);
             });
-
-            connection.on("ReceiveUsers", function (users) {
-                $('#users').empty();
-                users.forEach(function (user) {
-                    if (user.connectionId !== userId) {
-                        $('#users').append(`
-              <li class="user-item list-group-item d-flex align-items-center gap-2 py-2 px-3 mb-2 bg-white text-dark rounded shadow-sm"
-                  data-id="${user.connectionId}" data-name="${user.name}" style="cursor:pointer;">
-                <img src="https://ui-avatars.com/api/?name=${user.name}&background=random&size=32" class="rounded-circle" width="32" height="32" alt="${user.name}">
-                <span class="fw-semibold">${user.name}</span>
-              </li>
-            `);
-                    }
-                });
-
-                $(".user-item").on("click", function () {
-                    receiverId = $(this).data("id");
-                    receiverName = $(this).data("name");
-                    $("#chatWith").text(`Chatting with ${receiverName}`);
-                    $(".user-item").removeClass("active");
-                    $(this).addClass("active");
-                });
-            });
-
-            $("#loginForm").submit(function (e) {
-                e.preventDefault();
-
-                username = $("#username").val();
-
-                if (username) {
-                    connection.invoke("GetName", username).then(function (connectionId) {
-                        userId = connectionId;
-                        console.log("User ID:", userId);
-
-                        document.getElementById("chatMain").style.visibility = "visible";
-                        document.getElementById("deletedLogin").remove();
-
-                        connection.invoke("GetUsers").then(function () {
-                            console.log("Users list retrieved");
-                        }).catch(function (err) {
-                            console.error("GetUsers error:", err);
-                        });
-
-                    }).catch(function (err) {
-                        console.error("GetName error:", err);
-                    });
-                }
-            });
+        }
+    });
             $("#sendBtn").on("click", function () {
                 const message = $("#messageInput").val().trim();
                 if (!receiverId) return alert("Select a contact to chat.");

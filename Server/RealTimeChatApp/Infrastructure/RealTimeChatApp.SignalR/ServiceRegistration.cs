@@ -14,7 +14,8 @@ namespace RealTimeChatApp.SignalR
         public static void AddSignalRServices(this IServiceCollection services)
         {
             services.AddTransient<IChatHubService,ChatHubService>();
-            services.AddSignalR();
+            services.AddSignalR()
+             .AddStackExchangeRedis(RedisConfiguration.RedisHost);
         }
     }
 }

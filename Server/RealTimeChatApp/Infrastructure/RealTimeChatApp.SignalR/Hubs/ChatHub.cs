@@ -1,50 +1,64 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using RealTimeChatApp.Application.Abstractions.Hubs;
+using RealTimeChatApp.Application.Abstractions.Redis;
+using RealTimeChatApp.Application.Abstractions.Redis.RealTimeChatApp.Application.Abstractions.Redis;
 using RealTimeChatApp.Application.DTOs;
-using RealTimeChatApp.SignalR.Data;
 
 public sealed class ChatHub : Hub
 {
-
     private readonly IChatHubService _chathubService;
+    private readonly IRedisService _redisService;
 
-    public ChatHub(IChatHubService chathubService)
+    public ChatHub(IChatHubService chathubService, IRedisService redisService)
     {
         _chathubService = chathubService;
+        _redisService = redisService;
     }
 
-    public string GetName(string name)
+    // Kullanıcı bağlandığında Redis’e kaydediyoruz
+    public override async Task OnConnectedAsync()
     {
-        var exists = ClientSource.Clients.FirstOrDefault(c => c.ConnectionId == Context.ConnectionId);
-        if (exists == null)
-        {
-            ChatClient chatClient = new ChatClient()
-            {
-                ConnectionId = Context.ConnectionId,
-                Name = name
-            };
-            ClientSource.Clients.Add(chatClient);
-        }
-        Clients.All.SendAsync("ReceiveUsers", ClientSource.Clients);
-        return Context.ConnectionId;
+        var userId = Context.ConnectionId;
+        await _redisService.SetUserOnlineAsync(userId);
+        await Clients.All.SendAsync("UserOnline", userId);
+        await base.OnConnectedAsync();
     }
+
+    // Kullanıcı adı belirleme
+    public async Task SetUsername(string name)
+    {
+        var userId = Context.ConnectionId;
+
+        // Redis üzerinde kullanıcıyı kaydetme
+        await _redisService.SetUserNameAsync(userId, name);
+        var user = await _redisService.GetUserNameAsync(userId);
+
+        // Tüm kullanıcılara güncellenmiş kullanıcı listesi gönder
+        var users = await _redisService.GetOnlineUsersAsync();
+        await Clients.All.SendAsync("ReceiveUsers", users);
+
+        // Kullanıcıyı bildirme
+        await Clients.Caller.SendAsync("ReceiveUsers", users);
+
+        await Task.FromResult(userId);
+    }
+
     public async Task SendPrivateMessage(string receiverConnectionId, string message)
     {
         await _chathubService.SendPrivateMessage(receiverConnectionId, message);
     }
+
     public async Task NotifyTyping(string receiverConnectionId)
     {
         await _chathubService.NotifyTyping(receiverConnectionId);
     }
 
-    public override Task OnDisconnectedAsync(Exception? exception)
+    // Kullanıcı çıkarken Redis’ten siliyoruz
+    public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        var client = ClientSource.Clients.FirstOrDefault(c => c.ConnectionId == Context.ConnectionId);
-        if (client != null)
-        {
-            ClientSource.Clients.Remove(client);
-            Clients.All.SendAsync("ReceiveUsers", ClientSource.Clients);
-        }
-        return base.OnDisconnectedAsync(exception);
+        var userId = Context.ConnectionId;
+        await _redisService.RemoveUserAsync(userId);
+        await Clients.All.SendAsync("UserOffline", userId);
+        await base.OnDisconnectedAsync(exception);
     }
 }

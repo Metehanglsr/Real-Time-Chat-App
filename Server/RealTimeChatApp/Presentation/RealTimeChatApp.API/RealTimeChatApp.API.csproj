@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Infrastructure\RealTimeChatApp.Infrastructure\RealTimeChatApp.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\RealTimeChatApp.Redis\RealTimeChatApp.Redis.csproj" />
     <ProjectReference Include="..\..\Infrastructure\RealTimeChatApp.SignalR\RealTimeChatApp.SignalR.csproj" />
   </ItemGroup>
 

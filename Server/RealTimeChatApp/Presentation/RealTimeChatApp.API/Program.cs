@@ -1,9 +1,11 @@
+using RealTimeChatApp.Redis;
 using RealTimeChatApp.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddSignalRServices();
+builder.Services.AddRedisServices();
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
                     .AllowCredentials()
                     .AllowAnyHeader()
