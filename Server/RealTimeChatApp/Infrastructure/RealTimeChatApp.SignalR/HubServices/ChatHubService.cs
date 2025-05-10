@@ -24,7 +24,7 @@ namespace RealTimeChatApp.SignalR.HubServices
         public Task NotifyTyping(string receiverConnectionId)
         {
             return _hubContext.Clients.Client(receiverConnectionId)
-                .SendAsync("ReceiveTypingNotification");
+                .SendAsync(ReceiveFunctionNames.ReceiveTypingNotification);
         }
 
         public async Task SendPrivateMessage(string receiverConnectionId, string message)
@@ -33,7 +33,7 @@ namespace RealTimeChatApp.SignalR.HubServices
 
             if (receiverClient != null)
             {
-                await _hubContext.Clients.Client(receiverClient.ConnectionId).SendAsync("ReceiveMessage", message);
+                await _hubContext.Clients.Client(receiverClient.ConnectionId).SendAsync(ReceiveFunctionNames.ReceiveMessage, message);
             }
         }
     }

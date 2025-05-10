@@ -3,6 +3,7 @@ using RealTimeChatApp.Application.Abstractions.Hubs;
 using RealTimeChatApp.Application.Abstractions.Redis;
 using RealTimeChatApp.Application.Abstractions.Redis.RealTimeChatApp.Application.Abstractions.Redis;
 using RealTimeChatApp.Application.DTOs;
+using RealTimeChatApp.SignalR;
 
 public sealed class ChatHub : Hub
 {
@@ -15,33 +16,25 @@ public sealed class ChatHub : Hub
         _redisService = redisService;
     }
 
-    // Kullanıcı bağlandığında Redis’e kaydediyoruz
-    public override async Task OnConnectedAsync()
-    {
-        var userId = Context.ConnectionId;
-        await _redisService.SetUserOnlineAsync(userId);
-        await Clients.All.SendAsync("UserOnline", userId);
-        await base.OnConnectedAsync();
-    }
-
-    // Kullanıcı adı belirleme
-    public async Task SetUsername(string name)
+    public async Task<string> SetUsername(string name)
     {
         var userId = Context.ConnectionId;
 
-        // Redis üzerinde kullanıcıyı kaydetme
-        await _redisService.SetUserNameAsync(userId, name);
-        var user = await _redisService.GetUserNameAsync(userId);
+        var isAlreadyOnline = await _redisService.IsUserOnlineAsync(userId);
+        if (!isAlreadyOnline)
+        {
+            await _redisService.SetUserOnlineAsync(userId);
+            await _redisService.SetUserNameAsync(userId, name);
+            await Clients.All.SendAsync(ReceiveFunctionNames.UserOnline, userId);
+        }
 
-        // Tüm kullanıcılara güncellenmiş kullanıcı listesi gönder
         var users = await _redisService.GetOnlineUsersAsync();
-        await Clients.All.SendAsync("ReceiveUsers", users);
+        await Clients.All.SendAsync(ReceiveFunctionNames.ReceiveUsers, users);
 
-        // Kullanıcıyı bildirme
-        await Clients.Caller.SendAsync("ReceiveUsers", users);
-
-        await Task.FromResult(userId);
+        return userId;
     }
+
+
 
     public async Task SendPrivateMessage(string receiverConnectionId, string message)
     {
@@ -52,13 +45,11 @@ public sealed class ChatHub : Hub
     {
         await _chathubService.NotifyTyping(receiverConnectionId);
     }
-
-    // Kullanıcı çıkarken Redis’ten siliyoruz
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var userId = Context.ConnectionId;
         await _redisService.RemoveUserAsync(userId);
-        await Clients.All.SendAsync("UserOffline", userId);
+        await Clients.All.SendAsync(ReceiveFunctionNames.UserOffline, userId);
         await base.OnDisconnectedAsync(exception);
     }
 }

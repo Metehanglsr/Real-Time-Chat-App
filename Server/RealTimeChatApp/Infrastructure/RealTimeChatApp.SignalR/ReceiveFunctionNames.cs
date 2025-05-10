@@ -9,5 +9,9 @@ namespace RealTimeChatApp.SignalR
     public static class ReceiveFunctionNames
     {
         public const string ReceiveMessage = "ReceiveMessage";
+        public const string UserOffline = "UserOffline"; 
+        public const string UserOnline = "UserOnline";
+        public const string ReceiveUsers = "ReceiveUsers";
+        public const string ReceiveTypingNotification = "ReceiveTypingNotification"; 
     }
 }

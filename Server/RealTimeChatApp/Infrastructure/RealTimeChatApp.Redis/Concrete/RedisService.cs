@@ -70,6 +70,11 @@ namespace RealTimeChatApp.Redis.Concrete
                 Name = name!
             };
         }
+
+        public async Task<bool> IsUserOnlineAsync(string connectionId)
+        {
+            return await _db.KeyExistsAsync($"user:{connectionId}");
+        }
     }
 
 }
