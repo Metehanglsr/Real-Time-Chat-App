@@ -93,7 +93,6 @@ You can open the index.html in the browser directly using Live Server or serve i
 ### 6. Send Messages
 
 ### Future Enhancements:
-- **Message History**: Store message history in Redis or a database for persistent storage.
 - **User Authentication**: Add JWT authentication or another method for user verification.
 - **Chat Rooms**: Allow users to join different chat rooms.
 - **Database Integration**: Store chat data in a database for permanent records.
